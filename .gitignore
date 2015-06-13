@@ -1,3 +1,11 @@
+# Eclipse stuff
+.classpath
+.project
+.settings/
+
+# Maven stuff
 target/
+
+# Hadoop stuff
 input/
 output/
