@@ -24,12 +24,26 @@ import com.google.common.io.Files;
  */
 public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWritable, FrameWriteable> {
 
+	private static File GM_BINARY;
+	
+	// static constructor to extract the binary before the class is used
+	static {
+		final File workingDir = Files.createTempDir();
+		workingDir.deleteOnExit();
+		
+		try {
+			GM_BINARY = extractGraphicsMagick(workingDir);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void reduce(IntWritable key, Iterable<FrameWriteable> values, Context context) throws IOException, InterruptedException {
 		// prepare temporary directory and process arguments
 		final File workingDir = Files.createTempDir();
-		extractGraphicsMagick(workingDir);
-		final List<String> commandArray = new ArrayList<>(Arrays.asList("./gm", "convert", "-loop", "0", "-delay", "0"));
+		workingDir.deleteOnExit();
+		final List<String> commandArray = new ArrayList<>(Arrays.asList(GM_BINARY.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
 		final int firstFrameNumber = values.iterator().next().getFrameNumber();
 		
 		// write individual frames to disk and collect filenames
@@ -71,8 +85,8 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 	 * @param directory the directory where to store the extracted binary
 	 * @throws IOException if an I/O error occurs
 	 */
-	private void extractGraphicsMagick(File directory) throws IOException {
-		final URL gmURL = this.getClass().getResource("resources/gm");
+	private static File extractGraphicsMagick(File directory) throws IOException {
+		final URL gmURL = PovrayReducer.class.getResource("resources/gm");
 		if (gmURL == null) {
 			throw new IOException("could not determine source location of gm binary");
 		}
@@ -80,5 +94,6 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		final File outputFile = new File(directory, "gm");
 		FileUtils.copyURLToFile(gmURL, outputFile);
 		outputFile.setExecutable(true);
+		return outputFile;
 	}
 }
