@@ -1,9 +1,8 @@
-package MapReducePovray;
+package mapReducePovray;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +31,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		workingDir.deleteOnExit();
 		
 		try {
-			GM_BINARY = extractGraphicsMagick(workingDir);
+			GM_BINARY = Utils.extractFileFromUpperDirectory("gm", workingDir, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -79,22 +78,5 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		
 		// don't check for errors as it's a temporary directory, so it's deleted by the OS at some point anyway
 		FileUtils.deleteQuietly(workingDir);
-	}
-	
-	/**
-	 * Extract the  Graphics Magick binary from the JAR archive. The binary is executable after extraction.
-	 * @param directory the directory where to store the extracted binary
-	 * @throws IOException if an I/O error occurs
-	 */
-	private static File extractGraphicsMagick(File directory) throws IOException {
-		final URL gmURL = PovrayReducer.class.getResource("../gm");
-		if (gmURL == null) {
-			throw new IOException("could not determine source location of gm binary");
-		}
-		
-		final File outputFile = new File(directory, "gm");
-		FileUtils.copyURLToFile(gmURL, outputFile);
-		outputFile.setExecutable(true);
-		return outputFile;
 	}
 }

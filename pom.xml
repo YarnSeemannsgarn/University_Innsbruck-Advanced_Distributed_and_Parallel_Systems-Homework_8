@@ -32,6 +32,8 @@
 			<resource>
 				<directory>src/resources</directory>
 				<includes>
+					<include>povray</include>
+					<include>scherk.pov</include>
 					<include>gm</include>
 				</includes>
 			</resource>

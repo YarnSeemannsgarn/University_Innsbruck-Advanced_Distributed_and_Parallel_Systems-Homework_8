@@ -1,4 +1,4 @@
-package MapReducePovray;
+package mapReducePovray;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
