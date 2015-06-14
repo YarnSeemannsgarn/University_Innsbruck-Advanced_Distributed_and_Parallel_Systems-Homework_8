@@ -1,25 +1,26 @@
 package MapReducePovray;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-// Wordcount example
 // TODO: Sebastian has to implement povray reducer it
 public class PovrayReducer
-extends Reducer<Text,IntWritable,Text,IntWritable> {
-	private IntWritable result = new IntWritable();
+extends Reducer<IntWritable, BytesWritable, IntWritable, BytesWritable> {
+	private BytesWritable gif = new BytesWritable();
 
-	public void reduce(Text key, Iterable<IntWritable> values,
+	public void reduce(IntWritable key, Iterable<BytesWritable> values,
 			Context context
 			) throws IOException, InterruptedException {
-		int sum = 0;
-		for (IntWritable val : values) {
-			sum += val.get();
-		}
-		result.set(sum);
-		context.write(key, result);
+		
+		// TODO: Sebastian has to implement gif creation
+		gif = values.iterator().next();		
+		FileUtils.writeByteArrayToFile(new File("./test.png"), gif.getBytes());
+		
+		// context.write?
 	}
 }
