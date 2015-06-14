@@ -25,13 +25,23 @@ public class FrameWriteable implements Writable, Comparable<FrameWriteable> {
 	/**
 	 * Create a new frame with existing data.
 	 * @param frameNumber the frame number, or the number of the first frames if multiple are stored in the image data
+	 * @param imageFormat the format of the image, e.g. "png"
+	 * @param image the image data
+	 */
+	public FrameWriteable(int frameNumber, String imageFormat, byte[] image) {
+		mFrameNumber = frameNumber;
+		mImageFormat = imageFormat;
+		mImageData = new BytesWritable(image);
+	}
+	
+	/**
+	 * Create a new frame from a file.
+	 * @param frameNumber the frame number, or the number of the first frames if multiple are stored in the image data
 	 * @param image the file containing the image data
 	 * @throws IOException if an I/O error occurs
 	 */
 	public FrameWriteable(int frameNumber, File image) throws IOException {
-		mFrameNumber = frameNumber;
-		mImageFormat = Files.getFileExtension(image.getName());
-		mImageData = new BytesWritable(Files.toByteArray(image));
+		this(frameNumber, Files.getFileExtension(image.getName()), Files.toByteArray(image));
 	}
 	
 	/**

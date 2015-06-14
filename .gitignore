@@ -7,5 +7,6 @@
 target/
 
 # Hadoop stuff
+*.crc
 input/
 output/

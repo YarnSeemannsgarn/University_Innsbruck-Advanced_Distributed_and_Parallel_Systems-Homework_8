@@ -1,26 +1,27 @@
 package MapReducePovray;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-//Wordcount example
-//TODO: Jan has to implement povray mapper
-public class PovrayMapper
-extends Mapper<Object, Text, Text, IntWritable>{
+
+// Input format <?, Text>, where Text only contains the number of the frame
+// Output format <Intwritable, BytesWritable>, where IntWritable is always 1 and BytesWritable contains the generated picture
+public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteable>{
 
 	private final static IntWritable one = new IntWritable(1);
-	private Text word = new Text();
 
+	@Override
 	public void map(Object key, Text value, Context context
 			) throws IOException, InterruptedException {
-		StringTokenizer itr = new StringTokenizer(value.toString());
-		while (itr.hasMoreTokens()) {
-			word.set(itr.nextToken());
-			context.write(word, one);
-		}
+		Process p = Runtime.getRuntime().exec("./povray +I./scherk.pov Output_File_Name=- +FN +W1024 +H768 +"
+						+ " +KFI" + 1 + " +KFF1" + " +SF1" + " +EF1" + " -A0.1 +R2 +KI0 +KF1 +KC -P");
+		byte[] povrayResultBytes = IOUtils.toByteArray(p.getInputStream());
+
+		// TODO set proper frame number in constructor
+		context.write(one, new FrameWriteable(1, "png", povrayResultBytes));
 	}
 }
