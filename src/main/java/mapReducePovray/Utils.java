@@ -8,8 +8,10 @@ import org.apache.commons.io.FileUtils;
 
 public class Utils {
 	/**
-	 * Extract a file (e.g. povray and gm) from the JAR archive. The binary is executable after extraction.
+	 * Extract a file (e.g. povray and gm) from the JAR archive.
+	 * @param fileName the name of the file which should be extracted
 	 * @param directory the directory where to store the extracted file
+	 * @param setExecutable defines whether the output file should be executable or not
 	 * @throws IOException if an I/O error occurs
 	 */
 	public static File extractFileFromUpperDirectory(String fileName, File directory, boolean setExecutable) throws IOException {
