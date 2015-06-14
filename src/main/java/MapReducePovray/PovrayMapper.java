@@ -31,7 +31,11 @@ public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteab
 			) throws IOException, InterruptedException {
 		Process p = Runtime.getRuntime().exec("./povray +I./scherk.pov Output_File_Name=- +FN +W1024 +H768 +"
 						+ " +KFI" + 1 + " +KFF1" + " +SF1" + " +EF1" + " -A0.1 +R2 +KI0 +KF1 +KC -P");
+		
 		byte[] povrayResultBytes = IOUtils.toByteArray(p.getInputStream());
+		
+		// wait for povray to finish
+		System.out.println("povray status: " + p.waitFor());
 
 		// TODO set proper frame number in constructor
 		context.write(one, new FrameWriteable(1, "png", povrayResultBytes));

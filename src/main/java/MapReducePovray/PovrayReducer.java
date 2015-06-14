@@ -33,8 +33,14 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		final int firstFrameNumber = values.iterator().next().getFrameNumber();
 		
 		// write individual frames to disk and collect filenames
+		int frameCount = 0;
 		for (final FrameWriteable frame : values) {
+			frameCount++;
 			commandArray.add(frame.saveImage(workingDir));
+		}
+		if (frameCount == 0) {
+			System.out.println("reducer: nothing to do (no values) for key " + key);
+			return;
 		}
 		
 		final String outputFileName = "output.gif";
@@ -67,6 +73,10 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 	 */
 	private void extractGraphicsMagick(File directory) throws IOException {
 		final URL gmURL = this.getClass().getResource("resources/gm");
+		if (gmURL == null) {
+			throw new IOException("could not determine source location of gm binary");
+		}
+		
 		final File outputFile = new File(directory, "gm");
 		FileUtils.copyURLToFile(gmURL, outputFile);
 		outputFile.setExecutable(true);
