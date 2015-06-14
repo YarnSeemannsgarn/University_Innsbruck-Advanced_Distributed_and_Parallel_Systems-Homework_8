@@ -44,7 +44,8 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		final File workingDir = Files.createTempDir();
 		workingDir.deleteOnExit();
 		final List<String> commandArray = new ArrayList<>(Arrays.asList(GM_BINARY.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
-		final int firstFrameNumber = values.iterator().next().getFrameNumber();
+		// TODO: get first frame number, but rearrange iterator
+		//final int firstFrameNumber = values.iterator().next().getFrameNumber();
 		
 		// write individual frames to disk and collect filenames
 		int frameCount = 0;
@@ -74,7 +75,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		}
 		
 		// read the generated output and pass it to Hadoop
-		context.write(key, new FrameWriteable(firstFrameNumber, new File(workingDir, outputFileName)));
+		context.write(key, new FrameWriteable(1, new File(workingDir, outputFileName)));
 		
 		// don't check for errors as it's a temporary directory, so it's deleted by the OS at some point anyway
 		FileUtils.deleteQuietly(workingDir);
@@ -86,7 +87,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 	 * @throws IOException if an I/O error occurs
 	 */
 	private static File extractGraphicsMagick(File directory) throws IOException {
-		final URL gmURL = PovrayReducer.class.getResource("resources/gm");
+		final URL gmURL = PovrayReducer.class.getResource("../gm");
 		if (gmURL == null) {
 			throw new IOException("could not determine source location of gm binary");
 		}

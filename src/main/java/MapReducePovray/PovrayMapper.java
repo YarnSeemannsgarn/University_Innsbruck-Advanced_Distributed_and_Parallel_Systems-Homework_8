@@ -14,9 +14,9 @@ import org.apache.hadoop.mapreduce.Mapper;
  * Input format is <?, Text>, where 
  * Text lines contain the number of frames, the subset start and the subset end frame
  * 
- * Output format is <Intwritable, FramesWritable>, where 
+ * Output format is <Intwritable, FrameWritable>, where 
  * IntWritable is always 1 to combine all frames in the Reducer and 
- * BytesWritable contains the generated picture
+ * FrameWritable contains the generated picture
  * 
  * @author Jan Schlenker
  *
