@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  */
 public class Povray {
 	public static String INVALID_SYNTAX = "Invalid number of parameters.\n"
-			+ "Usage: $HADDOP_HOME/bin/hadoop jar target/map-reduce-povray-0.0.1-SNAPSHOT.jar MapReducePovray.Povray <input-dir> <output-dir>";
+			+ "Usage: $HADDOP_HOME/bin/hadoop jar target/map-reduce-povray-0.0.1-SNAPSHOT.jar mapReducePovray.Povray <input-dir> <output-dir>";
 	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2) {
