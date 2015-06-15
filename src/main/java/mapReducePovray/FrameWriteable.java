@@ -76,6 +76,14 @@ public class FrameWriteable implements Writable, Comparable<FrameWriteable> {
 	}
 	
 	/**
+	 * Get the raw image data.
+	 * @return the image data.
+	 */
+	public byte[] getImageData() {
+		return mImageData.copyBytes();
+	}
+	
+	/**
 	 * Get the name of the output file when writing the image data.
 	 * @return the file name
 	 */
