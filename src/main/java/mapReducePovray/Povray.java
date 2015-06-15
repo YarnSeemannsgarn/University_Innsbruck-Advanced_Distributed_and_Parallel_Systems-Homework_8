@@ -29,6 +29,7 @@ public class Povray {
 		job.setMapperClass(PovrayMapper.class);
 		job.setCombinerClass(PovrayReducer.class);
 		job.setReducerClass(PovrayReducer.class);
+		job.setOutputFormatClass(ImageOutputFormat.class);
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(FrameWriteable.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
