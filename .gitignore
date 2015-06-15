@@ -10,3 +10,4 @@ target/
 *.crc
 input/
 output/
+/AwsCredentials.properties
