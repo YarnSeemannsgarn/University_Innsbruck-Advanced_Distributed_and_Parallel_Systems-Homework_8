@@ -43,14 +43,16 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		final File workingDir = Files.createTempDir();
 		workingDir.deleteOnExit();
 		final List<String> commandArray = new ArrayList<>(Arrays.asList(GM_BINARY.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
-		// TODO: get first frame number, but rearrange iterator
-		//final int firstFrameNumber = values.iterator().next().getFrameNumber();
 		
 		// write individual frames to disk and collect filenames
 		int frameCount = 0;
+		int firstFrameNumber = -1;
 		for (final FrameWriteable frame : values) {
-			frameCount++;
+			if (firstFrameNumber < 0) {
+				firstFrameNumber = frame.getFrameNumber();
+			}
 			commandArray.add(frame.saveImage(workingDir));
+			frameCount++;
 		}
 		if (frameCount == 0) {
 			System.out.println("reducer: nothing to do (no values) for key " + key);
@@ -74,7 +76,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		}
 		
 		// read the generated output and pass it to Hadoop
-		context.write(key, new FrameWriteable(1, new File(workingDir, outputFileName)));
+		context.write(key, new FrameWriteable(firstFrameNumber, new File(workingDir, outputFileName)));
 		
 		// don't check for errors as it's a temporary directory, so it's deleted by the OS at some point anyway
 		FileUtils.deleteQuietly(workingDir);
