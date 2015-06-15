@@ -15,7 +15,7 @@ public class Utils {
 	 * @throws IOException if an I/O error occurs
 	 */
 	public static File extractFileFromUpperDirectory(String fileName, File directory, boolean setExecutable) throws IOException {
-		final URL fileUrl = Utils.class.getResource("../" + fileName);
+		final URL fileUrl = Utils.class.getResource("/" + fileName);
 		if (fileUrl == null) {
 			throw new IOException("could not determine source location of " + fileName);
 		}
