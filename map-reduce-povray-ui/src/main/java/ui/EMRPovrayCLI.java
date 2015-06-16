@@ -17,7 +17,7 @@ public final class EMRPovrayCLI {
 
 	public static void main(String[] args) {
 		// parse arguments
-		if (args.length != 3) {
+		if (args.length != 4) {
 			System.out.println("usage: EMRPovrayCLI awsRegion clusterId storageBucket frameCount");
 			System.exit(1);
 		}
