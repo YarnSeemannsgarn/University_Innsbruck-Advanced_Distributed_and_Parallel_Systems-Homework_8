@@ -24,8 +24,8 @@ import com.google.common.io.Files;
  */
 public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWritable, FrameWriteable> {
 
-	private static File GM_BINARY;
-	private static Logger log = Logger.getLogger(PovrayReducer.class);
+	private static File sGmBinary;
+	private static Logger sLog = Logger.getLogger(PovrayReducer.class);
 	
 	// static constructor to extract the binary before the class is used
 	static {
@@ -33,7 +33,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		workingDir.deleteOnExit();
 		
 		try {
-			GM_BINARY = Utils.extractFileFromUpperDirectory("gm", workingDir, true);
+			sGmBinary = Utils.extractFileFromUpperDirectory("gm", workingDir, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -44,7 +44,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		// prepare temporary directory and process arguments
 		final File workingDir = Files.createTempDir();
 		workingDir.deleteOnExit();
-		final List<String> commandArray = new ArrayList<>(Arrays.asList(GM_BINARY.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
+		final List<String> commandArray = new ArrayList<>(Arrays.asList(sGmBinary.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
 		
 		// write individual frames to disk and collect filenames
 		int frameCount = 0;
@@ -57,7 +57,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 			frameCount++;
 		}
 		if (frameCount == 0) {
-			log.info("nothing to do (no values) for key " + key);
+			sLog.info("nothing to do (no values) for key " + key);
 			return;
 		}
 		
