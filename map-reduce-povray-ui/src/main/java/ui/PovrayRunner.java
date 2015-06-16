@@ -40,7 +40,7 @@ public class PovrayRunner {
 	 * Name of the jar file containing the Map-Reduce implementation for Povray.
 	 * Must be present in the S3 bucket used for input/output.
 	 */
-	private static final String JAR_NAME = "map-reduce-povray-0.0.1-SNAPSHOT.jar";
+	private static final String JAR_NAME = "map-reduce-povray-1.0.jar";
 	
 	/**
 	 * Name of the main class in the jar-file.
@@ -57,6 +57,7 @@ public class PovrayRunner {
 	
 	private final String mClusterId;
 	private final String mStorageBucket;
+	private final String mPovFileName;
 	
 	/**
 	 * Create a new remote renderer.
@@ -64,8 +65,10 @@ public class PovrayRunner {
 	 * @param region AWS region where the cluster and S3 buckets are located
 	 * @param clusterId the ID of the cluster (job flow) which should be used for rendering
 	 * @param storageBucket the S3 bucket to use for storing input/output files
+	 * @param povFileName the name of the pov file, which must be stored on the bucket
 	 */
-	public PovrayRunner(AWSCredentials credentials, Region region, String clusterId, String storageBucket) {
+	public PovrayRunner(AWSCredentials credentials, Region region, String clusterId,
+			String storageBucket, String povFileName) {
 		mClusterId = clusterId;
 		mStorageBucket = storageBucket;
 		
@@ -74,6 +77,8 @@ public class PovrayRunner {
 		
 		mMapReduceClient = new AmazonElasticMapReduceClient(credentials);
 		mMapReduceClient.setRegion(region);
+		
+		mPovFileName = povFileName;
 	}
 	
 	/**
@@ -96,7 +101,7 @@ public class PovrayRunner {
 			HadoopJarStepConfig jarStepConfig = new HadoopJarStepConfig()
 			    .withJar(s3BaseUrl + JAR_NAME)
 			    .withMainClass(JAR_MAIN_CLASS)
-			    .withArgs(s3BaseUrl + "input/", s3BaseUrl + "output/");
+			    .withArgs(s3BaseUrl + "input/", s3BaseUrl + "output/", s3BaseUrl + mPovFileName);
 			final AddJobFlowStepsResult stepResult = mMapReduceClient
 					.addJobFlowSteps(new AddJobFlowStepsRequest(mClusterId)
 							.withSteps(new StepConfig("render", jarStepConfig)

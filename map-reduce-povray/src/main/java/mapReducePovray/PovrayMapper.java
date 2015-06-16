@@ -35,7 +35,6 @@ public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteab
 
 	private final static IntWritable one = new IntWritable(1);
 	private static File POVRAY_BINARY;
-	private static File POVRAY_INPUT;
 	private static Logger log = Logger.getLogger(PovrayMapper.class);
 
 	// static constructor to extract the binary and .pov file before the class is used
@@ -45,7 +44,6 @@ public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteab
 
 		try {
 			POVRAY_BINARY = Utils.extractFileFromUpperDirectory("povray", workingDir, true);
-			POVRAY_INPUT = Utils.extractFileFromUpperDirectory("scherk.pov", workingDir, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,9 +61,13 @@ public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteab
 		int endFrame = Integer.parseInt(inputTokenizer.nextToken());
 		int subsetStartFrame = Integer.parseInt(inputTokenizer.nextToken());
 		int subsetEndFrame = Integer.parseInt(inputTokenizer.nextToken());
-
+		
+		// Get pov file
+		File povFile = new File(Utils.povFileHDFSName);
+		
+		// Construct command
 		List<String> commandArray = new ArrayList<>(Arrays.asList(
-				POVRAY_BINARY.getAbsolutePath(), "+I" + POVRAY_INPUT.getAbsolutePath(), "+O" + workingDir.getAbsolutePath() + "/frame",
+				POVRAY_BINARY.getAbsolutePath(), "+I" + povFile.getAbsolutePath(), "+O" + workingDir.getAbsolutePath() + "/frame",
 				"+KFI" + startFrame, "+KFF" + endFrame, "+SF" + subsetStartFrame, "+EF" + subsetEndFrame,
 				"+FN", "+W1024", "+H768", "-A0.1", "+R2", "+KI0", "+KF1", "+KC", "-P")
 				);

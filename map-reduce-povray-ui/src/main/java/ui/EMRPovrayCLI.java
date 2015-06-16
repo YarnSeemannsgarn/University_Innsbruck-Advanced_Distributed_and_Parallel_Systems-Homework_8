@@ -17,14 +17,15 @@ public final class EMRPovrayCLI {
 
 	public static void main(String[] args) {
 		// parse arguments
-		if (args.length != 4) {
-			System.out.println("usage: EMRPovrayCLI awsRegion clusterId storageBucket frameCount");
+		if (args.length != 5) {
+			System.out.println("usage: EMRPovrayCLI awsRegion clusterId storageBucket frameCount povFileName");
 			System.exit(1);
 		}
 		final Region region = Region.getRegion(Regions.fromName(args[0]));
 		final String clusterId = args[1];
 		final String storageBucket = args[2];
 		final int frames = Integer.parseInt(args[3]);
+		final String povFileName = args[4];
 		
 		// read credentials
 		AWSCredentials credentials = null;
@@ -38,7 +39,7 @@ public final class EMRPovrayCLI {
 		
 		// render the animation
 		try {
-			new PovrayRunner(credentials, region, clusterId, storageBucket).render(frames, new File("out.gif"));
+			new PovrayRunner(credentials, region, clusterId, storageBucket, povFileName).render(frames, new File("out.gif"));
 		} catch (IOException e) {
 			System.out.println("rendering error");
 			e.printStackTrace();

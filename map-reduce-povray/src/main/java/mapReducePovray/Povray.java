@@ -1,5 +1,7 @@
 package mapReducePovray;
 
+import java.net.URI;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -15,10 +17,10 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  */
 public class Povray {
 	public static String INVALID_SYNTAX = "Invalid number of parameters.\n"
-			+ "Usage: $HADDOP_HOME/bin/hadoop jar target/map-reduce-povray-0.0.1-SNAPSHOT.jar mapReducePovray.Povray <input-dir> <output-dir>";
+			+ "Usage: $HADDOP_HOME/bin/hadoop jar target/map-reduce-povray-0.0.1-SNAPSHOT.jar mapReducePovray.Povray <input-dir> <output-dir> <uri-of-pov-file>";
 	
 	public static void main(String[] args) throws Exception {
-		if(args.length != 2) {
+		if(args.length != 3) {
 			System.err.println(INVALID_SYNTAX);
 			System.exit(1);
 		}
@@ -27,6 +29,7 @@ public class Povray {
 		Job job = Job.getInstance(conf, "povray");
 		job.setJarByClass(Povray.class);
 		job.setMapperClass(PovrayMapper.class);
+		job.addCacheFile(new URI(args[2] + "#" + Utils.povFileHDFSName));
 		job.setCombinerClass(PovrayReducer.class);
 		job.setReducerClass(PovrayReducer.class);
 		job.setOutputFormatClass(ImageOutputFormat.class);

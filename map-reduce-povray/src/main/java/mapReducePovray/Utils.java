@@ -7,6 +7,8 @@ import java.net.URL;
 import org.apache.commons.io.FileUtils;
 
 public class Utils {
+	public static final String povFileHDFSName = "povFile";
+	
 	/**
 	 * Extract a file (e.g. povray and gm) from the JAR archive.
 	 * @param fileName the name of the file which should be extracted
