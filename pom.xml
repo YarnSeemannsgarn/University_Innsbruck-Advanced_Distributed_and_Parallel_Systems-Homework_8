@@ -2,25 +2,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>parallel-systems</groupId>
-	<artifactId>map-reduce-povray</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>map-reduce-povray-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0</version>
+	<name>MapReduce Povray Parent</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	<modules>
+        <module>map-reduce-povray</module>
+        <module>map-reduce-povray-ui</module>
+	</modules>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-client</artifactId>
-			<version>2.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk</artifactId>
-			<version>1.10.0</version>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -33,15 +28,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<resources>
-			<resource>
-				<directory>src/resources</directory>
-				<includes>
-					<include>povray</include>
-					<include>scherk.pov</include>
-					<include>gm</include>
-				</includes>
-			</resource>
-		</resources>
 	</build>
 </project>
