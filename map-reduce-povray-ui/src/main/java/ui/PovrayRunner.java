@@ -41,7 +41,7 @@ public class PovrayRunner {
 	 * Name of the jar file containing the Map-Reduce implementation for Povray.
 	 * Must be present in the S3 bucket used for input/output.
 	 */
-	private static final String JAR_NAME = "map-reduce-povray-0.0.1-SNAPSHOT.jar";
+	private static final String JAR_NAME = "map-reduce-povray-1.0.jar";
 	
 	/**
 	 * Name of the main class in the jar-file.

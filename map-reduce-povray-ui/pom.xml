@@ -9,7 +9,7 @@
 	<artifactId>map-reduce-povray-ui</artifactId>
 	<packaging>jar</packaging>
 
-	<name>MapReduce Povray ui</name>
+	<name>MapReduce Povray UI</name>
 
 	<dependencies>
 		<dependency>
@@ -26,7 +26,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
 				<configuration>
-					<mainClass>ui.EMRPovrayCLI</mainClass>
+					<mainClass>ui.gui.EMRPovrayGUI</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
