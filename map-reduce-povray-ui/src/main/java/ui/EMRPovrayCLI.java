@@ -37,8 +37,15 @@ public final class EMRPovrayCLI {
 		}
 		
 		// render the animation
+		final PovrayRunner renderer = new PovrayRunner(credentials, region, clusterId, storageBucket);
+		renderer.addProgressListener(new ProgressListener() {
+			@Override
+			public void progressMessageChanged(String message) {
+				System.out.println("status: " + message);
+			}
+		});
 		try {
-			new PovrayRunner(credentials, region, clusterId, storageBucket).render(frames, new File("out.gif"));
+			renderer.render(frames, new File("out.gif"));
 		} catch (IOException e) {
 			System.out.println("rendering error");
 			e.printStackTrace();
