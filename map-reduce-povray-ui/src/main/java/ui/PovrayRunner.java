@@ -3,7 +3,10 @@ package ui;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +29,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.google.common.io.Files;
 
 /**
  * Renders a Povray animation using a running Amazon EMR cluster.
@@ -170,8 +172,8 @@ public class PovrayRunner {
 	 * @throws IOException if an I/O error occurs
 	 */
 	private void prepareInput(int frames) throws IOException {
-		final File tempDir = Files.createTempDir();
-		tempDir.deleteOnExit();
+		final Path tempDir = Files.createTempDirectory(null);
+		tempDir.toFile().deleteOnExit();
 		
 		try {
 			int start;
@@ -181,9 +183,9 @@ public class PovrayRunner {
 				start = end + 1;
 				end = Math.min(start + FRAMES_PER_MAPPER - 1, frames);
 				
-				final File file = new File(tempDir, "file" + inputNumber);
-				Files.write("1 " + frames + " " + start + " " + end, file, Charset.forName("UTF-8"));
-				mS3Client.putObject(mStorageBucket, "input/file" + inputNumber, file);
+				final Path file = tempDir.resolve("file" + inputNumber);
+				Files.write(file, Arrays.asList("1 " + frames + " " + start + " " + end), Charset.forName("UTF-8"));
+				mS3Client.putObject(mStorageBucket, "input/file" + inputNumber, file.toFile());
 				inputNumber++;
 			} while (end != frames);
 		} catch (IOException e) {
