@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +60,8 @@ public class PovrayRunner {
 	private final String mStorageBucket;
 	private final String mPovFileName;
 	
+	private final List<ProgressListener> mProgressListeners;
+	
 	/**
 	 * Create a new remote renderer.
 	 * @param credentials Amazon AWS credentials used for accessing the cluster
@@ -71,6 +74,7 @@ public class PovrayRunner {
 			String storageBucket, String povFileName) {
 		mClusterId = clusterId;
 		mStorageBucket = storageBucket;
+		mProgressListeners = new LinkedList<>();
 		
 		mS3Client = new AmazonS3Client(credentials);
 		mS3Client.setRegion(region);
@@ -90,13 +94,16 @@ public class PovrayRunner {
 	public void render(int frames, File output) throws IOException {
 		try {
 			// cleanup old files
+			notifyProgressMessageChanged("cleaning up remote storage");
 			deleteS3directory("input");
 			deleteS3directory("output");
 			
 			// prepare input files for the job
+			notifyProgressMessageChanged("preparing required input files");
 			prepareInput(frames);
 			
 			// create and run the job
+			notifyProgressMessageChanged("starting rendering job");
 			final String s3BaseUrl = "s3://" + mStorageBucket + "/";
 			HadoopJarStepConfig jarStepConfig = new HadoopJarStepConfig()
 			    .withJar(s3BaseUrl + JAR_NAME)
@@ -107,15 +114,19 @@ public class PovrayRunner {
 							.withSteps(new StepConfig("render", jarStepConfig)
 							.withActionOnFailure(ActionOnFailure.CONTINUE)));
 			
+			notifyProgressMessageChanged("waiting for completion of rendering job");
 			if (waitForJobCompletion(stepResult.getStepIds().get(0), 2, TimeUnit.SECONDS)) {	
 				// download the generated gif
+				notifyProgressMessageChanged("downloading generated animation");
 				downloadResult(output);
 			} else {
 				throw new IOException("job execution failed");
 			}
 		} catch (AmazonClientException e) {
-			throw new IOException("error when communicating with Amazon AWS", e);
+			throw new IOException("error when communicating with Amazon AWS:\n" + e.getMessage() + "", e);
 		}
+		
+		notifyProgressMessageChanged("rendering complete");
 	}
 	
 	/**
@@ -204,6 +215,33 @@ public class PovrayRunner {
 	 */
 	private void downloadResult(File output) {
 		mS3Client.getObject(new GetObjectRequest(mStorageBucket, "output/result"), output);
+	}
+	
+	/**
+	 * Notify all registered listeners about a new progress message.
+	 * @param message the new message
+	 */
+	protected void notifyProgressMessageChanged(String message) {
+		for (final ProgressListener listener : mProgressListeners) {
+			listener.progressMessageChanged(message);
+		}
+	}
+	
+	/**
+	 * Add a listener to receive messages about the current progress.
+	 * @param listener the listener to add
+	 */
+	public void addProgressListener(ProgressListener listener) {
+		mProgressListeners.add(listener);
+	}
+	
+	/**
+	 * Remove a listener and stop receiving progress updates. This method has no effect if
+	 * the specified listener is currently not registered. 
+	 * @param listener the listener to remove
+	 */
+	public void removeProgressListener(ProgressListener listener) {
+		mProgressListeners.remove(listener);
 	}
 
 }

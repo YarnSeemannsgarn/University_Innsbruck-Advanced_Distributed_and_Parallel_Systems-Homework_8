@@ -31,15 +31,22 @@ public final class EMRPovrayCLI {
 		AWSCredentials credentials = null;
 		try {
 		    credentials = new PropertiesCredentials(new File("AwsCredentials.properties"));
-		} catch (IOException e1) {
+		} catch (IllegalArgumentException | IOException e1) {
 		    System.out.println("Credentials were not properly entered into AwsCredentials.properties.");
 		    System.out.println(e1.getMessage());
 		    System.exit(2);
 		}
 		
 		// render the animation
+		final PovrayRunner renderer = new PovrayRunner(credentials, region, clusterId, storageBucket, povFileName);
+		renderer.addProgressListener(new ProgressListener() {
+			@Override
+			public void progressMessageChanged(String message) {
+				System.out.println("status: " + message);
+			}
+		});
 		try {
-			new PovrayRunner(credentials, region, clusterId, storageBucket, povFileName).render(frames, new File("out.gif"));
+			renderer.render(frames, new File("out.gif"));
 		} catch (IOException e) {
 			System.out.println("rendering error");
 			e.printStackTrace();

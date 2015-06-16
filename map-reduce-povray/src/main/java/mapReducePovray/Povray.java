@@ -35,6 +35,8 @@ public class Povray {
 		job.setOutputFormatClass(ImageOutputFormat.class);
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(FrameWriteable.class);
+		// only use one reducer to avoid generating multiple output files
+		job.setNumReduceTasks(1);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
