@@ -3,7 +3,6 @@ package mapReducePovray;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -41,18 +40,17 @@ public class ImageOutputFormat extends FileOutputFormat<Writable, FrameWriteable
 	@Override
 	public RecordWriter<Writable, FrameWriteable> getRecordWriter(TaskAttemptContext job) throws IOException, InterruptedException {
 	    final Path path = FileOutputFormat.getOutputPath(job);
-	    final Configuration conf = job.getConfiguration();
-		final FileSystem fs = path.getFileSystem(conf);
+	    final FileSystem fs = path.getFileSystem(job.getConfiguration());
 	    
 		if (!getCompressOutput(job)) {
 			final Path fullPath = new Path(path, "result");
-			final FSDataOutputStream fileOut = fs.create(fullPath, false);
+			final FSDataOutputStream fileOut = fs.create(fullPath, job);
 			return new ImageRecordWriter(fileOut);
 		} else {
 			final Class<? extends CompressionCodec>  codecClass = getOutputCompressorClass(job, DefaultCodec.class);
-			final CompressionCodec codec = (CompressionCodec) ReflectionUtils.newInstance(codecClass, conf);
+			final CompressionCodec codec = (CompressionCodec) ReflectionUtils.newInstance(codecClass, job.getConfiguration());
 			final Path fullPath = new Path(path, "result" + codec.getDefaultExtension());
-			final FSDataOutputStream fileOut = fs.create(fullPath, false);
+			final FSDataOutputStream fileOut = fs.create(fullPath, job);
 			return new ImageRecordWriter(codec.createOutputStream(fileOut));
 		}
 			
