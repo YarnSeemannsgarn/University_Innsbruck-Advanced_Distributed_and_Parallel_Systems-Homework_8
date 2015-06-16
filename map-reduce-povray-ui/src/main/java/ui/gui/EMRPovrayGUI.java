@@ -39,6 +39,10 @@ public class EMRPovrayGUI {
 	private final RenderOptionsFrame mOptionsFrame;
 	private final ExecutorService mExecutorService;
 	
+	/**
+	 * Create a new renderer GUI.
+	 * @param credentials the credentials to use for interacting with AWS
+	 */
 	public EMRPovrayGUI(AWSCredentials credentials) {
 		mCredentials = credentials;
 		
@@ -64,6 +68,9 @@ public class EMRPovrayGUI {
 		mOptionsFrame.setVisible(true);
 	}
 	
+	/**
+	 * Render the animation using the currently entered options.
+	 */
 	private void render() {
 		mOptionsFrame.setProgress(true);
 		
