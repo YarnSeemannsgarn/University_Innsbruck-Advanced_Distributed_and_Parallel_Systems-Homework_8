@@ -44,7 +44,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		// prepare temporary directory and process arguments
 		final File workingDir = Files.createTempDir();
 		workingDir.deleteOnExit();
-		final List<String> commandArray = new ArrayList<>(Arrays.asList(sGmBinary.getAbsolutePath(), "convert", "-loop", "0", "-delay", "0"));
+		final List<String> commandArray = new ArrayList<>(Arrays.asList(sGmBinary.getAbsolutePath(), "convert", "-loop", "0", "-delay", "10"));
 		
 		// write individual frames to disk and collect filenames
 		int frameCount = 0;
