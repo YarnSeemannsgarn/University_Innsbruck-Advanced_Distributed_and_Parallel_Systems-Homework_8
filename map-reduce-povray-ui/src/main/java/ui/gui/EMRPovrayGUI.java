@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -37,6 +39,7 @@ public class EMRPovrayGUI {
 	
 	private final AWSCredentials mCredentials;
 	private final RenderOptionsFrame mOptionsFrame;
+	private final ImageFrame mImageFrame;
 	private final ExecutorService mExecutorService;
 	
 	/**
@@ -56,6 +59,8 @@ public class EMRPovrayGUI {
 			}
 		});
 		
+		mImageFrame = new ImageFrame();
+		
 		mOptionsFrame = new RenderOptionsFrame(DEFAULT_REGION, DEFAULT_CLUSTER_ID, DEFAULT_STORAGE_BUCKET);
 		mOptionsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mOptionsFrame.addRenderActionListener(new ActionListener() {
@@ -73,6 +78,7 @@ public class EMRPovrayGUI {
 	 */
 	private void render() {
 		mOptionsFrame.setProgress(true);
+		mImageFrame.setVisible(false);
 		
 		// render on a different thread to avoid blocking the GUI
 		mExecutorService.submit(new Runnable() {
@@ -96,7 +102,18 @@ public class EMRPovrayGUI {
 				});
 				
 				try {
-					renderer.render(mOptionsFrame.getFrameCount(), mOptionsFrame.getOutputFile());
+					final File outputFile = mOptionsFrame.getOutputFile();
+					renderer.render(mOptionsFrame.getFrameCount(), outputFile);
+					
+					final Icon image = new ImageIcon(outputFile.getAbsolutePath());
+					EventQueue.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							mImageFrame.setTitle(outputFile.getName());
+							mImageFrame.setImage(image);
+							mImageFrame.setVisible(true);
+						}
+					});
 				} catch (final IOException e) {
 					e.printStackTrace();
 					
