@@ -31,7 +31,6 @@ import com.google.common.io.Files;
  * @author Jan Schlenker
  *
  */
-
 public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteable>{
 
 	private final static IntWritable one = new IntWritable(1);
@@ -84,8 +83,10 @@ public class PovrayMapper extends Mapper<Object, Text, IntWritable, FrameWriteab
 		}
 
 		// Get frames and return them as mapper output
+		int numberOfDigitsForFrame = String.valueOf(endFrame).length();
 		for (int i = subsetStartFrame; i <= subsetEndFrame; i++) {
-			Path framPath = Paths.get(workingDir.getAbsolutePath() + "/frame" + i + ".png");
+			String frameNumber = String.format("%0" + numberOfDigitsForFrame + "d", i);
+			Path framPath = Paths.get(workingDir.getAbsolutePath() + "/frame" + frameNumber + ".png");
 			byte[] frameBytes = java.nio.file.Files.readAllBytes(framPath);
 			context.write(one, new FrameWriteable(i, "png", frameBytes));
 		}

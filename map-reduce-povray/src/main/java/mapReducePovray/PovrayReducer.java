@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.log4j.Logger;
 
 import com.google.common.io.Files;
 
@@ -24,6 +25,7 @@ import com.google.common.io.Files;
 public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWritable, FrameWriteable> {
 
 	private static File GM_BINARY;
+	private static Logger log = Logger.getLogger(PovrayReducer.class);
 	
 	// static constructor to extract the binary before the class is used
 	static {
@@ -55,7 +57,7 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 			frameCount++;
 		}
 		if (frameCount == 0) {
-			System.out.println("reducer: nothing to do (no values) for key " + key);
+			log.info("nothing to do (no values) for key " + key);
 			return;
 		}
 		
