@@ -30,7 +30,7 @@ public final class EMRPovrayCLI {
 		AWSCredentials credentials = null;
 		try {
 		    credentials = new PropertiesCredentials(new File("AwsCredentials.properties"));
-		} catch (IOException e1) {
+		} catch (IllegalArgumentException | IOException e1) {
 		    System.out.println("Credentials were not properly entered into AwsCredentials.properties.");
 		    System.out.println(e1.getMessage());
 		    System.exit(2);

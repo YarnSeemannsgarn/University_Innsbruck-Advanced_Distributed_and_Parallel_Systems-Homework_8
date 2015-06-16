@@ -118,7 +118,7 @@ public class PovrayRunner {
 				throw new IOException("job execution failed");
 			}
 		} catch (AmazonClientException e) {
-			throw new IOException("error when communicating with Amazon AWS", e);
+			throw new IOException("error when communicating with Amazon AWS:\n" + e.getMessage() + "", e);
 		}
 		
 		notifyProgressMessageChanged("rendering complete");
