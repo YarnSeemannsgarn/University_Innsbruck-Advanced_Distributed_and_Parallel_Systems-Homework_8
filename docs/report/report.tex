@@ -59,7 +59,7 @@
 \begin{tabular}{l l}
 Instructor: & Dipl.-Ing. Dr. Simon Ostermann \\
 Programming language: & Java \\
-Library used: & Hadoop 2.4.0 \& Java AWS SDK 1.1.0 \\
+Library used: & Hadoop 2.4.0 \& Java AWS SDK 1.10.0 \\
 Total points: & 50 \\
 \end{tabular}
 \end{center}
@@ -73,7 +73,7 @@ Total points: & 50 \\
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
-\section{Prerequirements}
+\section{Prerequisites}
 
 \begin{itemize}
 \item Java 1.7
@@ -114,10 +114,10 @@ The programme can also be executed on Amazon EMR. A small user interface for usi
 \begin{itemize}
 \item Create an EMR cluster, note the cluster ID
 \item Create an S3 bucket and upload the jar-file containing the map-reduce implementation
-\item Create access credentials which have permissions to create and monitor steps on the cluster and can list and edit files on the S3 bucket. Store them in a properties file called "AwsCredentials.properties" as entries named accessKey and secretKey.
+\item Create access credentials which have permissions to create and monitor steps on the cluster and can list and edit files on the S3 bucket. Store them in a properties file called "AwsCredentials.properties" as entries named \emph{accessKey} and \emph{secretKey}.
 \end{itemize}
 
-The map-reduce-povray-ui gui programme can be executed via:
+The map-reduce-povray-ui GUI programme can be executed via:
 
 \begin{lstlisting}[language=bash, deletekeywords={cd}]
   $ cd map-reduce-povray-ui
@@ -155,5 +155,13 @@ The needed pov-file for the mapper processes is attached as a cache file by the 
 
 \subsection{Reducer (\& Combiner)}
 In Hadoop the output of one mapper will first go into one combiner. The combiner works often as a pre-reducer and reduces the output of one mapper. In this programme the combiner and the reducer implementations are the same. The combiner first merges the rendered pictures of one mapper to a gif and outputs them to the shuffler. The shuffler on the other hand outputs all values with the same key to one reducer. Because there is only one key, the shuffler outputs always only one dataset, which contains all the pre-merged gifs. At last one reducer merges all pre-merged gifs to one.
+
+\section{Performance}
+
+To test the implementation, the well known \emph{scherk.pov} animation was rendered using Amazon EMR. A cluster using four \emph{m3.xlarge}\footnote{\emph{xlarge} instances are the smallest type of the current generation usable with Amazon EMR} instances as core instances and a single \emph{c3.xlarge} instance as a master was set up. In this setup 16 cores in total are available for rendering.
+
+In the first tests \emph{c3.xlarge} instances were used for the rendering as they are slightly cheaper than the \emph{m3} counterparts and provide slightly better computational performance according to the Amazon specifications. However only two mapper tasks per node were run in parallel by the Hadoop scheduler, and the computational power of the nodes was therefore not utilized fully. Further investigation indicated that in the used version Hadoop uses multiple parameters such as available CPU cores and memory together with an estimation of required resources per task to decide on the actual number of parallel tasks. Therefore test were done again using \emph{m3.xlarge} instances which have the same number of CPU cores but twice the memory available. Hadoop scheduled six tasks per node in this configuration, which seemed appropriate. Hadoop introduces some overhead when managing the individual tasks; due to the maximum number of active tasks being slightly higher than the number of available CPU cores, the node should be utilized fully by the Povray processes most of the time.
+
+The animation was rendered with a resolution of 1024x786 pixels. On the described cluster 300 frames could be rendered in approximately 8 minutes. The execution of the rendering job itself on the cluster was done in 7 minutes (timing data taken from EMR logs of the job execution). Data transfer and starting the job on the cluster add an additional minute which was not measured precisely as it primarily depends on the speed of the local internet connection and other parameters out of the scope of the implementation.
 
 \end{document}
