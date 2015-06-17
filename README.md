@@ -1,4 +1,4 @@
-The programme allows to render [povray](http://www.povray.org/) files on a [hadoop](http://hadoop.apache.org/) cluster.
+The programme allows to render [Povray](http://www.povray.org/) files on a [Hadoop](http://hadoop.apache.org/) cluster.
 
 The programme is splitted into two subprogrammes:
 
