@@ -53,12 +53,16 @@ public class PovrayRunner {
 	 */
 	private static final int FRAMES_PER_MAPPER = 10;
 	
+	/**
+	 * Name of the Povray scene description when uploaded to S3.
+	 */
+	private static final String POV_FILE_NAME = "render.pov";
+	
 	private final AmazonS3 mS3Client;
 	private final AmazonElasticMapReduce mMapReduceClient;
 	
 	private final String mClusterId;
 	private final String mStorageBucket;
-	private final String mPovFileName;
 	
 	private final List<ProgressListener> mProgressListeners;
 	
@@ -68,10 +72,8 @@ public class PovrayRunner {
 	 * @param region AWS region where the cluster and S3 buckets are located
 	 * @param clusterId the ID of the cluster (job flow) which should be used for rendering
 	 * @param storageBucket the S3 bucket to use for storing input/output files
-	 * @param povFileName the name of the pov file, which must be stored on the bucket
 	 */
-	public PovrayRunner(AWSCredentials credentials, Region region, String clusterId,
-			String storageBucket, String povFileName) {
+	public PovrayRunner(AWSCredentials credentials, Region region, String clusterId, String storageBucket) {
 		mClusterId = clusterId;
 		mStorageBucket = storageBucket;
 		mProgressListeners = new LinkedList<>();
@@ -81,17 +83,18 @@ public class PovrayRunner {
 		
 		mMapReduceClient = new AmazonElasticMapReduceClient(credentials);
 		mMapReduceClient.setRegion(region);
-		
-		mPovFileName = povFileName;
 	}
 	
 	/**
 	 * Render the animation.
+	 * @param povFile Povray scene description which should be rendered
 	 * @param frames number of frames to render
 	 * @param output local file for storing the generated animation
 	 * @throws IOException if an error occurs
 	 */
-	public void render(int frames, File output) throws IOException {
+	public void render(File povFile, int frames, File output) throws IOException {
+		final String s3BaseUrl = "s3://" + mStorageBucket + "/";
+		
 		try {
 			// cleanup old files
 			notifyProgressMessageChanged("cleaning up remote storage");
@@ -101,17 +104,17 @@ public class PovrayRunner {
 			// prepare input files for the job
 			notifyProgressMessageChanged("preparing required input files");
 			prepareInput(frames);
+			mS3Client.putObject(mStorageBucket, POV_FILE_NAME, povFile);
 			
 			// create and run the job
 			notifyProgressMessageChanged("starting rendering job");
-			final String s3BaseUrl = "s3://" + mStorageBucket + "/";
 			HadoopJarStepConfig jarStepConfig = new HadoopJarStepConfig()
 			    .withJar(s3BaseUrl + JAR_NAME)
 			    .withMainClass(JAR_MAIN_CLASS)
-			    .withArgs(s3BaseUrl + "input/", s3BaseUrl + "output/", s3BaseUrl + mPovFileName);
+			    .withArgs(s3BaseUrl + "input/", s3BaseUrl + "output/", s3BaseUrl + POV_FILE_NAME);
 			final AddJobFlowStepsResult stepResult = mMapReduceClient
 					.addJobFlowSteps(new AddJobFlowStepsRequest(mClusterId)
-							.withSteps(new StepConfig("render", jarStepConfig)
+							.withSteps(new StepConfig("render " + frames + " '" + povFile.getName() + "'", jarStepConfig)
 							.withActionOnFailure(ActionOnFailure.CONTINUE)));
 			
 			notifyProgressMessageChanged("waiting for completion of rendering job");
@@ -182,7 +185,8 @@ public class PovrayRunner {
 	}
 
 	/**
-	 * Prepare the input files required by the Map-Reduce implementation.
+	 * Prepare the input files describing the frames to render as 
+	 * required by the Map-Reduce implementation.
 	 * Creates the required files and uploads them to the S3 bucket.
 	 * @param frames the number of frames to render
 	 * @throws IOException if an I/O error occurs
