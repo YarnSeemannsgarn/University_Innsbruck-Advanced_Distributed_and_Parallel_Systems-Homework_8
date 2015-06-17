@@ -16,7 +16,11 @@ The map-reduce-povray programme can be executed on a local hadoop cluster via:
 
 	$ $HADOOP_HOME/bin/hadoop jar map-reduce-povray/target/map-reduce-povray-1.0.jar mapReducePovray.Povray <input-dir> <output-dir> <uri-of-pov-file>
 
-The programme can also be executed on EMR. Therefore the EMR cluster must be created, so that the jar can be uploaded. The pov-file, which should be rendered, can be uploaded e.g. to a S3 bucket.
+The programme can also be executed on Amazon EMR. A small user interface for using it via EMR is available in the project _map-reduce-povray-ui_.
+Required preparations before running the user interface (applies to both the command line and GUI version):
+* Create an EMR cluster, note the cluster ID.
+* Create an S3 bucket and upload the jar-file containing the map-reduce implementation
+* Create access credentials which have permissions to create and monitor steps on the cluster and can list and edit files on the S3 bucket. Store them in a properties file called "AwsCredentials.properties" as entries named _accessKey_ and _secretKey_.
 
 The map-reduce-povray-ui gui programme can be executed via:
 
