@@ -41,8 +41,12 @@ public class RenderOptionsFrame extends JFrame {
 	private JButton mBtnRender;
 	private JLabel mLblProgressMessage;
 	
-	private final JFileChooser mFileChooser;
+	private final JFileChooser mOutputFileChooser;
+	private final JFileChooser mPovFileChooser;
+	private File mPovFile;
 	private File mOutputFile;
+	private JTextField mTxtSceneFile;
+	private JButton mBtnSelectScene;
 
 	/**
 	 * Create the frame.
@@ -52,9 +56,12 @@ public class RenderOptionsFrame extends JFrame {
 	 */
 	public RenderOptionsFrame(Regions defaultRegion, String defaultCluster, String defaultBucket) {
 		createGui();
-		mFileChooser = new JFileChooser();
-		mFileChooser.setFileFilter(new FileNameExtensionFilter("GIF animation", "gif"));
-		mFileChooser.setAcceptAllFileFilterUsed(false);
+		mOutputFileChooser = new JFileChooser();
+		mOutputFileChooser.setFileFilter(new FileNameExtensionFilter("GIF animation", "gif"));
+		mOutputFileChooser.setAcceptAllFileFilterUsed(false);
+		mPovFileChooser = new JFileChooser();
+		mPovFileChooser.setFileFilter(new FileNameExtensionFilter("Povray scene", "pov"));
+		mPovFileChooser.setAcceptAllFileFilterUsed(false);
 		
 		mComboBoxRegion.setSelectedItem(defaultRegion);
 		mTxtClusterId.setText(defaultCluster);
@@ -84,13 +91,24 @@ public class RenderOptionsFrame extends JFrame {
 		mBtnSelectOutput.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (mFileChooser.showSaveDialog(RenderOptionsFrame.this) == JFileChooser.APPROVE_OPTION) {
-					mOutputFile = mFileChooser.getSelectedFile();
+				if (mOutputFileChooser.showSaveDialog(RenderOptionsFrame.this) == JFileChooser.APPROVE_OPTION) {
+					mOutputFile = mOutputFileChooser.getSelectedFile();
 					if (!mOutputFile.getName().endsWith(".gif")) {
 						mOutputFile = new File(mOutputFile.getPath() + ".gif");
 					}
 					
 					mTxtOutputFile.setText(mOutputFile.getAbsolutePath());
+					verifyInputs();
+				}
+			}
+		});
+		
+		mBtnSelectScene.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (mPovFileChooser.showOpenDialog(RenderOptionsFrame.this) == JFileChooser.APPROVE_OPTION) {
+					mPovFile = mPovFileChooser.getSelectedFile();
+					mTxtSceneFile.setText(mPovFile.getAbsolutePath());
 					verifyInputs();
 				}
 			}
@@ -102,7 +120,7 @@ public class RenderOptionsFrame extends JFrame {
 	 */
 	private void createGui() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 381);
+		setBounds(100, 100, 459, 456);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -112,7 +130,7 @@ public class RenderOptionsFrame extends JFrame {
 		JPanel awsPanel = new JPanel();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, awsPanel, 6, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, awsPanel, 5, SpringLayout.WEST, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, awsPanel, 130, SpringLayout.NORTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, awsPanel, 180, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, awsPanel, -5, SpringLayout.EAST, contentPane);
 		awsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "AWS settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		SpringLayout sl_awsPanel = new SpringLayout();
@@ -139,21 +157,21 @@ public class RenderOptionsFrame extends JFrame {
 		JLabel lblClusterId = new JLabel("EMR cluster ID");
 		lblClusterId.setHorizontalAlignment(SwingConstants.TRAILING);
 		sl_awsPanel.putConstraint(SpringLayout.EAST, lblRegion, 0, SpringLayout.EAST, lblClusterId);
-		sl_awsPanel.putConstraint(SpringLayout.NORTH, lblBucket, 10, SpringLayout.SOUTH, lblClusterId);
 		sl_awsPanel.putConstraint(SpringLayout.EAST, lblBucket, 0, SpringLayout.EAST, lblClusterId);
-		sl_awsPanel.putConstraint(SpringLayout.NORTH, lblClusterId, 10, SpringLayout.SOUTH, lblRegion);
 		sl_awsPanel.putConstraint(SpringLayout.WEST, lblClusterId, 0, SpringLayout.WEST, lblRegion);
 		awsPanel.add(lblClusterId);
 		
 		mTxtBucket = new JTextField();
-		sl_awsPanel.putConstraint(SpringLayout.NORTH, mTxtBucket, -3, SpringLayout.NORTH, lblBucket);
+		sl_awsPanel.putConstraint(SpringLayout.NORTH, lblBucket, 3, SpringLayout.NORTH, mTxtBucket);
 		awsPanel.add(mTxtBucket);
 		mTxtBucket.setColumns(25);
 		
 		mTxtClusterId = new JTextField();
+		sl_awsPanel.putConstraint(SpringLayout.NORTH, mTxtBucket, 3, SpringLayout.SOUTH, mTxtClusterId);
+		sl_awsPanel.putConstraint(SpringLayout.NORTH, lblClusterId, 3, SpringLayout.NORTH, mTxtClusterId);
+		sl_awsPanel.putConstraint(SpringLayout.NORTH, mTxtClusterId, 3, SpringLayout.SOUTH, mComboBoxRegion);
 		sl_awsPanel.putConstraint(SpringLayout.WEST, mTxtBucket, 0, SpringLayout.WEST, mTxtClusterId);
 		sl_awsPanel.putConstraint(SpringLayout.EAST, mTxtBucket, 0, SpringLayout.EAST, mTxtClusterId);
-		sl_awsPanel.putConstraint(SpringLayout.NORTH, mTxtClusterId, -3, SpringLayout.NORTH, lblClusterId);
 		sl_awsPanel.putConstraint(SpringLayout.WEST, mTxtClusterId, 0, SpringLayout.WEST, mComboBoxRegion);
 		sl_awsPanel.putConstraint(SpringLayout.EAST, mTxtClusterId, 0, SpringLayout.EAST, mComboBoxRegion);
 		awsPanel.add(mTxtClusterId);
@@ -175,7 +193,6 @@ public class RenderOptionsFrame extends JFrame {
 		
 		JLabel lblOutput = new JLabel("Output");
 		lblOutput.setHorizontalAlignment(SwingConstants.TRAILING);
-		sl_povrayPanel.putConstraint(SpringLayout.NORTH, lblOutput, 10, SpringLayout.SOUTH, lblFrameCount);
 		sl_povrayPanel.putConstraint(SpringLayout.WEST, lblOutput, 0, SpringLayout.WEST, lblFrameCount);
 		sl_povrayPanel.putConstraint(SpringLayout.EAST, lblOutput, 0, SpringLayout.EAST, lblFrameCount);
 		povrayPanel.add(lblOutput);
@@ -188,15 +205,15 @@ public class RenderOptionsFrame extends JFrame {
 		povrayPanel.add(mSpinnerFrameCount);
 		
 		mTxtOutputFile = new JTextField();
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, lblOutput, 3, SpringLayout.NORTH, mTxtOutputFile);
 		mTxtOutputFile.setEditable(false);
-		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mTxtOutputFile, -3, SpringLayout.NORTH, lblOutput);
 		sl_povrayPanel.putConstraint(SpringLayout.WEST, mTxtOutputFile, 0, SpringLayout.WEST, mSpinnerFrameCount);
 		povrayPanel.add(mTxtOutputFile);
 		mTxtOutputFile.setColumns(10);
 		
 		mBtnSelectOutput = new JButton("Select...");
-		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mBtnSelectOutput, -1, SpringLayout.NORTH, mTxtOutputFile);
-		sl_povrayPanel.putConstraint(SpringLayout.SOUTH, mBtnSelectOutput, 1, SpringLayout.SOUTH, mTxtOutputFile);
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mBtnSelectOutput, 0, SpringLayout.NORTH, mTxtOutputFile);
+		sl_povrayPanel.putConstraint(SpringLayout.SOUTH, mBtnSelectOutput, 0, SpringLayout.SOUTH, mTxtOutputFile);
 		sl_povrayPanel.putConstraint(SpringLayout.EAST, mTxtOutputFile, -6, SpringLayout.WEST, mBtnSelectOutput);
 		sl_povrayPanel.putConstraint(SpringLayout.EAST, mBtnSelectOutput, 0, SpringLayout.EAST, mSpinnerFrameCount);
 		povrayPanel.add(mBtnSelectOutput);
@@ -211,6 +228,28 @@ public class RenderOptionsFrame extends JFrame {
 		
 		mProgressBar = new JProgressBar();
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, povrayPanel, -6, SpringLayout.NORTH, mProgressBar);
+		
+		JLabel lblScene = new JLabel("Scene");
+		sl_povrayPanel.putConstraint(SpringLayout.WEST, lblScene, 0, SpringLayout.WEST, lblFrameCount);
+		lblScene.setHorizontalAlignment(SwingConstants.TRAILING);
+		sl_povrayPanel.putConstraint(SpringLayout.EAST, lblScene, 0, SpringLayout.EAST, lblFrameCount);
+		povrayPanel.add(lblScene);
+		
+		mTxtSceneFile = new JTextField();
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mTxtOutputFile, 3, SpringLayout.SOUTH, mTxtSceneFile);
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, lblScene, 3, SpringLayout.NORTH, mTxtSceneFile);
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mTxtSceneFile, 3, SpringLayout.SOUTH, mSpinnerFrameCount);
+		sl_povrayPanel.putConstraint(SpringLayout.WEST, mTxtSceneFile, 0, SpringLayout.WEST, mSpinnerFrameCount);
+		mTxtSceneFile.setEditable(false);
+		povrayPanel.add(mTxtSceneFile);
+		mTxtSceneFile.setColumns(10);
+		
+		mBtnSelectScene = new JButton("Select...");
+		sl_povrayPanel.putConstraint(SpringLayout.NORTH, mBtnSelectScene, 0, SpringLayout.NORTH, mTxtSceneFile);
+		sl_povrayPanel.putConstraint(SpringLayout.SOUTH, mBtnSelectScene, 0, SpringLayout.SOUTH, mTxtSceneFile);
+		sl_povrayPanel.putConstraint(SpringLayout.EAST, mBtnSelectScene, 0, SpringLayout.EAST, mSpinnerFrameCount);
+		sl_povrayPanel.putConstraint(SpringLayout.EAST, mTxtSceneFile, -6, SpringLayout.WEST, mBtnSelectScene);
+		povrayPanel.add(mBtnSelectScene);
 		sl_contentPane.putConstraint(SpringLayout.WEST, mProgressBar, 0, SpringLayout.WEST, mLblProgressMessage);
 		contentPane.add(mProgressBar);
 		
@@ -224,7 +263,10 @@ public class RenderOptionsFrame extends JFrame {
 	}
 	
 	protected void verifyInputs() {
-		final boolean invalid = mTxtClusterId.getText().isEmpty() || mTxtBucket.getText().isEmpty() || mOutputFile == null;
+		final boolean invalid = mTxtClusterId.getText().isEmpty()
+				|| mTxtBucket.getText().isEmpty() || mOutputFile == null
+				|| mPovFile == null;
+		
 		mBtnRender.setEnabled(!invalid);
 	}
 	
@@ -300,5 +342,13 @@ public class RenderOptionsFrame extends JFrame {
 	 */
 	public File getOutputFile() {
 		return mOutputFile;
+	}
+	
+	/**
+	 * Get the Povray scene description which should be rendered.
+	 * @return the input file
+	 */
+	public File getPovFile() {
+		return mPovFile;
 	}
 }

@@ -103,7 +103,7 @@ public class EMRPovrayGUI {
 				
 				try {
 					final File outputFile = mOptionsFrame.getOutputFile();
-					renderer.render(mOptionsFrame.getFrameCount(), outputFile);
+					renderer.render(mOptionsFrame.getPovFile(), mOptionsFrame.getFrameCount(), outputFile);
 					
 					final Icon image = new ImageIcon(outputFile.getAbsolutePath());
 					EventQueue.invokeLater(new Runnable() {
