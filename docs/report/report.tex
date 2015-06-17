@@ -103,7 +103,7 @@ First of all build all projects:
   $ mvn clean install
 \end{lstlisting}
 
-The map-reduce-povray programme can be executed on a local hadoop cluster via:
+The map-reduce-povray programme can be executed on a local Hadoop cluster via:
 
 \begin{lstlisting}[language=bash, deletekeywords={cd}]
   $ $HADOOP_HOME/bin/hadoop jar map-reduce-povray/target/map-reduce-povray-1.0.jar mapReducePovray.Povray <input-dir> <output-dir> <uri-of-pov-file>
@@ -144,7 +144,7 @@ The mapper processes take text files as input, whose first line must have the fo
   <start-frame> <end-frame> <subset-start-frame> <subset-end-frame>
 \end{lstlisting}
 
-Because the povray file is part of the created jar, the mappers can simply create the subset-frames, pack them as FrameWritables (which is a custom implementation of the Mapper/Reducer ouput interface Wrtiable) and output them one by one in the following format:
+Because the Povray file is part of the created jar, the mappers can simply create the subset-frames, pack them as FrameWritables (which is a custom implementation of the Mapper/Reducer output interface Writable) and output them one by one in the following format:
 
 \begin{lstlisting}[language=bash, deletekeywords={cd}]
   1, FrameWritable(<frame-number>, "png", <bytes-of-frame>)
@@ -154,6 +154,6 @@ The key is always one, because one reducer is responsible for values with the sa
 The needed pov-file for the mapper processes is attached as a cache file by the main programme.
 
 \subsection{Reducer (\& Combiner)}
-In Hadoop the output of one mapper will first go into one combiner. The combiner works often as a pre-reducer and reduces the output of one mapper. In this programme the combiner and the reducer implementations are the same. The combiner first merges the rendered pictures of one mapper to a gif and outputs them to the shufller. The shuffler on the other hand outputs all values with the same key to one reducer. Because there is only one key, the shuffler outputs always only one dataset, which contains all the pre-merged gifs. At last on reducer merges all pre-merged gifs to one.
+In Hadoop the output of one mapper will first go into one combiner. The combiner works often as a pre-reducer and reduces the output of one mapper. In this programme the combiner and the reducer implementations are the same. The combiner first merges the rendered pictures of one mapper to a gif and outputs them to the shuffler. The shuffler on the other hand outputs all values with the same key to one reducer. Because there is only one key, the shuffler outputs always only one dataset, which contains all the pre-merged gifs. At last one reducer merges all pre-merged gifs to one.
 
 \end{document}
