@@ -6,6 +6,8 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.io.IntWritable;
@@ -47,19 +49,19 @@ public class PovrayReducer extends Reducer<IntWritable, FrameWriteable, IntWrita
 		final List<String> commandArray = new ArrayList<>(Arrays.asList(sGmBinary.getAbsolutePath(), "convert", "-loop", "0", "-delay", "10"));
 		
 		// write individual frames to disk and collect filenames
-		int frameCount = 0;
-		int firstFrameNumber = -1;
+		// insert filenames into a sorted map so we can retrieve them sorted by frame number later
+		final SortedMap<Integer, String> frameFilenameMap = new TreeMap<>();
 		for (final FrameWriteable frame : values) {
-			if (firstFrameNumber < 0) {
-				firstFrameNumber = frame.getFrameNumber();
-			}
-			commandArray.add(frame.saveImage(workingDir));
-			frameCount++;
+			frameFilenameMap.put(frame.getFrameNumber(), frame.saveImage(workingDir));
 		}
-		if (frameCount == 0) {
+		if (frameFilenameMap.isEmpty()) {
 			sLog.info("nothing to do (no values) for key " + key);
 			return;
 		}
+		
+		// add filenames as arguments ordered by their frame number
+		commandArray.addAll(frameFilenameMap.values());
+		final int firstFrameNumber = frameFilenameMap.keySet().iterator().next();
 		
 		final String outputFileName = "output.gif";
 		commandArray.add(outputFileName);
