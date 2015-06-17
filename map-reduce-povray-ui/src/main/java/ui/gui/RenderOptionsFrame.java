@@ -294,6 +294,7 @@ public class RenderOptionsFrame extends JFrame {
 		mTxtBucket.setEnabled(enabled);
 		mSpinnerFrameCount.setEnabled(enabled);
 		mBtnSelectOutput.setEnabled(enabled);
+		mBtnSelectScene.setEnabled(enabled);
 	}
 	
 	/**
